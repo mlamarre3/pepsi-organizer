@@ -16,6 +16,16 @@ st.title("Pepsi Forecast Transformer")
 st.markdown("""
 Upload the required files to generate a transformed Excel file for use in pivot tables.
 """)
+st.markdown("""
+### Welcome to the Pepsi Forecast Transformer!
+
+**Steps to Use This App:**
+1. Upload the required files: Calendar, Pepsi data, and Conversion file.
+2. The app will clean and transform your data automatically.
+3. Click the download button to get your formatted Excel file.
+
+Tip: Make sure your files follow the expected format and headers.
+""")
 
 # File uploaders
 cal_file = st.file_uploader("Upload Calendar CSV", type=["csv"])
