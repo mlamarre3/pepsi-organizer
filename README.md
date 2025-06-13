@@ -1,2 +1,3 @@
 # pepsi-organizer
-App that using python to organize the pepsi excel files
+Data manipulation app that exchanges weight metrics from customer measurement to business measurement as well as creates datafile in specified format for the team.
+Created to streamline demand planning process for team members.
