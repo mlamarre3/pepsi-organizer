@@ -27,7 +27,7 @@ st.markdown("""
 Tip: Make sure your files follow the expected format and headers.
 """)
 
-# File uploaders
+# File upload
 cal_file = st.file_uploader("Upload Calendar CSV", type=["csv"])
 main_file = st.file_uploader("Upload Pepsi Excel File", type=["xls", "xlsx"])
 ref_file = st.file_uploader("Upload Conversion Excel File", type=["xls", "xlsx"])
@@ -42,7 +42,7 @@ if cal_file and main_file and ref_file:
     main.columns = main.columns.str.strip().str.replace('\xa0', '', regex=True)
     ref.columns = ref.columns.str.strip().str.replace('\xa0', '', regex=True)
 
-    # Standardize key fields
+    # Standardize columns
     main['Item'] = main['Item'].astype(str).str.strip()
     ref['Pepsi Item# (RMID#)'] = ref['Pepsi Item# (RMID#)'].astype(str).str.strip()
     main['Plant Desc'] = main['Plant Desc'].astype(str).str.strip()
@@ -51,11 +51,11 @@ if cal_file and main_file and ref_file:
     # Drop unnecessary columns
     main.drop(['Trademark','Cluster Qty','Container Size','Deposit','Wind','Design Style','Lane'], axis=1, inplace=True)
 
-    # Merge
+    # Merge reference and main file
     merged = main.merge(ref, left_on=['Item', 'Plant Desc'], right_on=['Pepsi Item# (RMID#)', 'Pepsi Plant Desc'], how='left')
     merged.drop(['Supplier Desc','Pepsi Item Desc','Pepsi Plant Desc'], axis=1, inplace=True)
 
-    # Melt operation
+    # Melt wide dates to long
     melt = merged.melt(id_vars=[
         'Supplier','Item','SAP Item Number','Item Category', 'UOM','Plant', 'SAP Plant Number',
         'Plant Desc','QTY Open POs QTY with Supplier','Quantity Onhand','Scheduled Receipts',
@@ -63,12 +63,12 @@ if cal_file and main_file and ref_file:
         'Current J# w/Fcst','Berry Item Desc','Country','Item Desc'],
         var_name='Week', value_name='IM')
 
-    # Conversion
+    # Convert impressions to linear feet to pounds
     melt['IM'] = melt['IM'].replace(',', '', regex=True).astype(float)
     melt['LF'] = (melt['IM'] / melt['IM/LF']) / 1000
     melt['LB'] = melt['LF'] * melt['LF/LB']
 
-    # Merge calendar
+    # Merge calendar to prep for monthly totals
     melt['Week'] = pd.to_datetime(melt['Week'], format='%m/%d/%y', errors='coerce')
     cal['CalendarDate'] = pd.to_datetime(cal['CalendarDate'])
     final = melt.merge(cal, left_on='Week', right_on='CalendarDate', how='left')
@@ -98,7 +98,7 @@ if cal_file and main_file and ref_file:
     towrite.seek(0)
 
     st.success("Transformation complete! Download your file below.")
-    st.download_button(label="📥 Download Transformed Excel",
+    st.download_button(label=" Download Transformed Excel",
                        data=towrite,
                        file_name=filename,
                        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
